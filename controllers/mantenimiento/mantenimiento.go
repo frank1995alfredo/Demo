@@ -712,7 +712,7 @@ func ActualizarCliente(c *gin.Context) {
 	}
 
 	if err := database.DB.Where("cliente_id=?", c.Param("id")).First(&clien).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cliente no encontrado no encontrada."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cliente no encontrado."})
 		return
 	}
 
