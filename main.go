@@ -1,11 +1,19 @@
 package main
 
 import (
-	//database "github.com/frank1995alfredo/api/database"
+	config "github.com/frank1995alfredo/api/config"
+	database "github.com/frank1995alfredo/api/database"
 	rutas "github.com/frank1995alfredo/api/routes"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	//.ConectorBD()
+	r := gin.Default()
+	r.Use(config.CORS)
+
+	database.ConectorBD()
+	defer database.DB.Close()
+
 	rutas.Rutas()
+	r.Run()
 }

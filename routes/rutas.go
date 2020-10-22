@@ -1,21 +1,19 @@
 package rutas
 
 import (
-	mantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento"
+	mantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/metodos"
+	practicas "github.com/frank1995alfredo/api/controllers/practicas"
 
-	database "github.com/frank1995alfredo/api/database"
-
-	config "github.com/frank1995alfredo/api/config"
 	"github.com/gin-gonic/gin"
 )
 
 //Rutas ...
 func Rutas() {
 	r := gin.Default()
-	r.Use(config.CORS)
+	//r.Use(config.CORS)
 
-	database.ConectorBD()
-	defer database.DB.Close()
+	//.ConectorBD()
+	//defer database.DB.Close()
 
 	provincia := r.Group("/provincias")
 	{
@@ -37,7 +35,7 @@ func Rutas() {
 
 	discapacidad := r.Group("/discapacidades")
 	{
-		discapacidad.GET("/obtenerDiscapacidad", mantenimiento.ObtenerDiscapadcidad)
+		discapacidad.GET("/obtenerDiscapacidad", mantenimiento.ObtenerDiscapacidad)
 		discapacidad.POST("/crearDiscapacidad", mantenimiento.CrearDiscapacidad)
 		discapacidad.GET("/buscarDiscapacidad/:descripcion", mantenimiento.BuscarDiscapacidad)
 		discapacidad.PATCH("/actualizarDiscapacidad/:id", mantenimiento.ActualizarDiscapacidad)
@@ -71,5 +69,14 @@ func Rutas() {
 		empleado.DELETE("/eliminarEmpleado/:id", mantenimiento.EliminarEmpleado)
 	}
 
-	r.Run()
+	persona := r.Group("/personas")
+	{
+		persona.GET("/obtenerCliente", practicas.ObtenerCliente)
+		persona.POST("/crearPersona", practicas.CrearPersona)
+		persona.GET("/buscarPersona/:apellido", practicas.BuscarPersona)
+		persona.PATCH("/actualizarPersona/:id", practicas.ActualizarPersona)
+		persona.DELETE("/eliminarPersona/:id", practicas.EliminarPersona)
+	}
+
+	//r.Run()
 }

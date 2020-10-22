@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/frank1995alfredo/api/models/mantenimiento"
+	"github.com/frank1995alfredo/api/models/practica"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres" //asdads
@@ -38,6 +39,9 @@ func ConectorBD() {
 	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("cargo_emp_id", "cargo_emps(cargo_emp_id)", "SET NULL", "CASCADE")
 	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
 	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
+
+	bd.AutoMigrate(&practica.Contacto{}, &practica.Persona{})
+	bd.Model(&practica.Contacto{}).AddForeignKey("per_id", "personas(persona_id)", "SET NULL", "CASCADE")
 
 	log.Println("Migracion satisfactoria")
 
