@@ -20,4 +20,5 @@ type Empleado struct {
 	Estado      bool    `json:"estado"`
 	Foto        *string `json:"foto"`
 	NivelDis    string  `json:"niveldis"`
+	Usuario     User    `json:"usuario" gorm:"foreignkey:EmpID"`
 }

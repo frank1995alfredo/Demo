@@ -2,7 +2,7 @@ package mantenimiento
 
 //Ciudad ...
 type Ciudad struct {
-	CiudadID    uint       `json:"idciudad" gorm:"primary_key"`
+	CiudadID    uint64     `json:"idciudad" gorm:"primary_key"`
 	ProID       uint       `json:"idprovincia" gorm:"not null"`
 	Descripcion string     `json:"descripcion" gorm:"size:100;not null"`
 	Estado      bool       `json:"estado"`

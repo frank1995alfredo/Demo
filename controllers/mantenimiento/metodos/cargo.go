@@ -2,10 +2,13 @@ package metodos
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/biezhi/gorm-paginator/pagination"
 	inputsMantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,12 +18,33 @@ import (
 func ObtenerCargo(c *gin.Context) {
 	var cargo []mantenimiento.CargoEmp
 
-	err := database.DB.Order("cargo_emp_id").Find(&cargo).Error
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-	} else {
-		c.SecureJSON(http.StatusOK, gin.H{"data": cargo})
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
 	}
+
+	err2 := database.DB.Order("cargo_emp_id").Find(&cargo).Error
+	if err2 != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+
+	db := database.DB.Find(&cargo)
+
+	paginator := pagination.Paging(&pagination.Param{
+		DB:      db,
+		Page:    page,
+		Limit:   limit,
+		OrderBy: []string{"cargo_emp_id asc"},
+		ShowSQL: false,
+	}, &cargo)
+	c.SecureJSON(http.StatusOK, gin.H{"data": paginator})
+
 }
 
 //CrearCargo ...
@@ -28,6 +52,13 @@ func CrearCargo(c *gin.Context) {
 
 	var input inputsMantenimiento.CargoInput
 	var carg mantenimiento.CargoEmp
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	//validaops los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -51,8 +82,8 @@ func CrearCargo(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Create(&cargo).Error //si no hay un error, se guarda el articulo
-	if err != nil {
+	err2 := tx.Create(&cargo).Error //si no hay un error, se guarda el articulo
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -65,6 +96,13 @@ func CrearCargo(c *gin.Context) {
 func BuscarCargo(c *gin.Context) {
 
 	var cargo mantenimiento.CargoEmp
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	if err := database.DB.Where("descripcion=?", c.Param("descripcion")).First(&cargo).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe este cargo."})
@@ -79,6 +117,13 @@ func ActualizarCargo(c *gin.Context) {
 
 	var input inputsMantenimiento.CargoInput
 	var carg mantenimiento.CargoEmp
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -100,8 +145,8 @@ func ActualizarCargo(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Model(&carg).Where("cargo_emp_id=?", c.Param("id")).Update(cargo).Error
-	if err != nil {
+	err2 := tx.Model(&carg).Where("cargo_emp_id=?", c.Param("id")).Update(cargo).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -114,10 +159,17 @@ func EliminarCargo(c *gin.Context) {
 
 	var cargo mantenimiento.CargoEmp
 
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
+
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Where("cargo_emp_id=?", c.Param("id")).Delete(&cargo).Error
-	if err != nil {
+	err2 := tx.Where("cargo_emp_id=?", c.Param("id")).Delete(&cargo).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()

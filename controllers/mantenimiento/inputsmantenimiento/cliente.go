@@ -15,6 +15,7 @@ type ClienteInput struct {
 	Email       string `json:"email"`
 	Telefono    string `json:"telefono"`
 	Genero      string `json:"genero"`
+	Estado      bool   `json:"estado"`
 	NivelDis    string `json:"niveldis"`
 }
 

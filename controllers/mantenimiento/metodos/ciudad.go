@@ -3,9 +3,15 @@ package metodos
 import (
 	"net/http"
 
+	"strconv"
+
+	"github.com/biezhi/gorm-paginator/pagination"
+	_ "github.com/biezhi/gorm-paginator/pagination" //paginador
+
 	inputsMantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,24 +19,54 @@ import (
 
 //ObtenerCiudad ...
 func ObtenerCiudad(c *gin.Context) {
+
 	var ciudad []mantenimiento.Ciudad
 
-	err := database.DB.Order("ciudad_id").Find(&ciudad).Error
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-	} else {
-		c.SecureJSON(http.StatusOK, gin.H{"data": ciudad})
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
 	}
+
+	err2 := database.DB.Order("ciudad_id").Find(&ciudad).Error
+
+	if err2 != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err2.Error})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+
+	db := database.DB.Where("estado=?", true).Find(&ciudad)
+
+	paginator := pagination.Paging(&pagination.Param{
+		DB:      db,
+		Page:    page,
+		Limit:   limit,
+		OrderBy: []string{"ciudad_id asc"},
+		ShowSQL: false,
+	}, &ciudad)
+	c.SecureJSON(http.StatusOK, gin.H{"data": paginator})
+
 }
 
 //CrearCiudad ... metodo para crear una provincia
 func CrearCiudad(c *gin.Context) {
-
+	//var ciudadId uint64
 	var input inputsMantenimiento.CiudadInput
 	var ciu mantenimiento.Ciudad
-	//validaops los inputs
+
+	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "unauthorized ")
 		return
 	}
 
@@ -47,8 +83,8 @@ func CrearCiudad(c *gin.Context) {
 	ciudad := mantenimiento.Ciudad{ProID: input.ProID, Descripcion: input.Descripcion, Estado: input.Estado}
 
 	tx := database.DB.Begin()
-	err := tx.Create(&ciudad).Error //si no hay un error, se guarda el articulo
-	if err != nil {
+	err2 := tx.Create(&ciudad).Error //si no hay un error, se guarda el articulo
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -60,6 +96,12 @@ func CrearCiudad(c *gin.Context) {
 func BuscarCiudad(c *gin.Context) {
 
 	var ciu mantenimiento.Ciudad
+
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos para acceder a esta opción.")
+		return
+	}
 
 	if err := database.DB.Where("descripcion=?", c.Param("descripcion")).First(&ciu).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe esta provincia."})
@@ -81,6 +123,12 @@ func ActualizarCiudad(c *gin.Context) {
 		return
 	}
 
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos para acceder a esta opción.")
+		return
+	}
+
 	if err := database.DB.Where("ciudad_id=?", c.Param("id")).First(&ciu).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Provincia no encontrada."})
 		return
@@ -90,19 +138,25 @@ func ActualizarCiudad(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Model(&ciu).Where("ciudad_id=?", c.Param("id")).Update(ciudad).Error
-	if err != nil {
+	err2 := tx.Model(&ciu).Where("ciudad_id=?", c.Param("id")).Update(ciudad).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
 
-	c.SecureJSON(http.StatusCreated, gin.H{"data": ciudad})
+	c.SecureJSON(http.StatusCreated, gin.H{"data": "Registro actualizado correctamente."})
 }
 
 //EliminarCiudad ...
 func EliminarCiudad(c *gin.Context) {
 
 	var ciudad mantenimiento.Ciudad
+
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos para acceder a esta opción.")
+		return
+	}
 
 	if err := database.DB.Where("ciudad_id=?", c.Param("id")).First(&ciudad).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ciudad no existe."})
@@ -111,8 +165,8 @@ func EliminarCiudad(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Where("ciudad_id=?", c.Param("id")).Delete(&ciudad).Error
-	if err != nil {
+	err2 := tx.Model(&ciudad).Where("ciudad_id=?", c.Param("id")).Update("estado", false).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()

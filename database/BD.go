@@ -43,6 +43,9 @@ func ConectorBD() {
 	bd.AutoMigrate(&practica.Contacto{}, &practica.Persona{})
 	bd.Model(&practica.Contacto{}).AddForeignKey("per_id", "personas(persona_id)", "SET NULL", "CASCADE")
 
+	bd.AutoMigrate(&mantenimiento.User{})
+	bd.Model(&mantenimiento.User{}).AddForeignKey("emp_id", "empleados(empleado_id)", "SET NULL", "CASCADE")
+
 	log.Println("Migracion satisfactoria")
 
 	DB = bd //toma la conexion de la base de datos

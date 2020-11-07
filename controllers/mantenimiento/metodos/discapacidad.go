@@ -2,26 +2,50 @@ package metodos
 
 import (
 	"net/http"
+	"strconv"
 
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsmantenimiento"
+	"github.com/biezhi/gorm-paginator/pagination"
+	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	token "github.com/frank1995alfredo/api/token"
 
 	"github.com/gin-gonic/gin"
 )
 
 /**************METODOS PARA DISCAPACIDAD*******************/
 
-//ObtenerDiscapadcidad ...
+//ObtenerDiscapacidad ...
 func ObtenerDiscapacidad(c *gin.Context) {
 	var discapacidad []mantenimiento.Discapacidad
 
-	err := database.DB.Order("discapacidad_id").Find(&discapacidad).Error
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-	} else {
-		c.SecureJSON(http.StatusOK, gin.H{"data": discapacidad})
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
 	}
+
+	err2 := database.DB.Find(&discapacidad).Error
+	if err2 != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+
+	db := database.DB.Find(&discapacidad)
+
+	paginator := pagination.Paging(&pagination.Param{
+		DB:      db,
+		Page:    page,
+		Limit:   limit,
+		OrderBy: []string{"discapacidad_id asc"},
+		ShowSQL: false,
+	}, &discapacidad)
+	c.SecureJSON(http.StatusOK, gin.H{"data": paginator})
+
 }
 
 //CrearDiscapacidad ...
@@ -30,7 +54,13 @@ func CrearDiscapacidad(c *gin.Context) {
 	var input inputsmantenimiento.DiscapacidadInput
 	var discap mantenimiento.Discapacidad
 
-	//validaops los inputs
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
+	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -52,8 +82,8 @@ func CrearDiscapacidad(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Create(&discapacidad).Error //si no hay un error, se guarda el articulo
-	if err != nil {
+	err2 := tx.Create(&discapacidad).Error //si no hay un error, se guarda el articulo
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -66,6 +96,13 @@ func CrearDiscapacidad(c *gin.Context) {
 func BuscarDiscapacidad(c *gin.Context) {
 
 	var discap mantenimiento.Discapacidad
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	if err := database.DB.Where("descripcion=?", c.Param("descripcion")).First(&discap).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe esta discapacidad."})
@@ -80,6 +117,13 @@ func ActualizarDiscapacidad(c *gin.Context) {
 
 	var input inputsmantenimiento.DiscapacidadInput
 	var disc mantenimiento.Discapacidad
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -101,8 +145,8 @@ func ActualizarDiscapacidad(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Model(&disc).Where("discapacidad_id=?", c.Param("id")).Update(discapacidad).Error
-	if err != nil {
+	err2 := tx.Model(&disc).Where("discapacidad_id=?", c.Param("id")).Update(discapacidad).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -115,6 +159,13 @@ func EliminarDiscapacidad(c *gin.Context) {
 
 	var discapacidad mantenimiento.Discapacidad
 
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
+
 	if err := database.DB.Where("discapacidad_id=?", c.Param("id")).First(&discapacidad).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Esta discapacidad no existe"})
 		return
@@ -122,8 +173,8 @@ func EliminarDiscapacidad(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Where("discapacidad_id=?", c.Param("id")).Delete(&discapacidad).Error
-	if err != nil {
+	err2 := tx.Where("discapacidad_id=?", c.Param("id")).Delete(&discapacidad).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()

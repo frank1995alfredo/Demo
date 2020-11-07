@@ -2,10 +2,13 @@ package metodos
 
 import (
 	"net/http"
+	"strconv"
 
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsmantenimiento"
+	"github.com/biezhi/gorm-paginator/pagination"
+	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +19,33 @@ func ObtenerEmpleado(c *gin.Context) {
 
 	var empleado []mantenimiento.Empleado
 
-	err := database.DB.Order("empleado_id").Find(&empleado).Error
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-	} else {
-		c.SecureJSON(http.StatusOK, gin.H{"data": empleado})
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
 	}
+
+	err2 := database.DB.Find(&empleado).Error
+	if err2 != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+
+	db := database.DB.Where("estado=?", true).Find(&empleado)
+
+	paginator := pagination.Paging(&pagination.Param{
+		DB:      db,
+		Page:    page,
+		Limit:   limit,
+		OrderBy: []string{"empleado_id asc"},
+		ShowSQL: false,
+	}, &empleado)
+	c.SecureJSON(http.StatusOK, gin.H{"data": paginator})
+
 }
 
 //CrearEmpleado ...
@@ -30,13 +54,20 @@ func CrearEmpleado(c *gin.Context) {
 	var input inputsmantenimiento.EmpleadoInput
 	var emp mantenimiento.Empleado
 
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
+
 	//validams los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	//valido que los camplos obligatorios no esten vacios
+	//valido que los campos obligatorios no esten vacios
 	if input.ValidarEntrada() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
 		return
@@ -57,8 +88,8 @@ func CrearEmpleado(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Create(&empleado).Error //si no hay un error, se guarda el articulo
-	if err != nil {
+	err2 := tx.Create(&empleado).Error //si no hay un error, se guarda el articulo
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -71,6 +102,13 @@ func CrearEmpleado(c *gin.Context) {
 func BuscarEmpleado(c *gin.Context) {
 
 	var empleado mantenimiento.Empleado
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	if err := database.DB.Where("num_cedula=?", c.Param("numcedula")).First(&empleado).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe este empleado."})
@@ -85,6 +123,13 @@ func ActualizarEmpleado(c *gin.Context) {
 
 	var input inputsmantenimiento.EmpleadoInput
 	var emp mantenimiento.Empleado
+
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -116,8 +161,8 @@ func ActualizarEmpleado(c *gin.Context) {
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
-	err := tx.Model(&emp).Where("cargo_emp_id=?", c.Param("id")).Update(empleado).Error
-	if err != nil {
+	err2 := tx.Model(&emp).Where("empleado_id=?", c.Param("id")).Update(empleado).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()
@@ -128,12 +173,18 @@ func ActualizarEmpleado(c *gin.Context) {
 //EliminarEmpleado ...
 func EliminarEmpleado(c *gin.Context) {
 
-	var empleado mantenimiento.CargoEmp
+	var emp mantenimiento.Empleado
 
-	//inicio de la transaccion
-	tx := database.DB.Begin()
-	err := tx.Where("empleado_id=?", c.Param("id")).Delete(&empleado).Error
+	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
+	_, err := token.ExtractTokenMetadata(c.Request)
 	if err != nil {
+		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		return
+	}
+
+	tx := database.DB.Begin()
+	err2 := tx.Model(&emp).Where("empleado_id=?", c.Param("id")).Update("estado", false).Error
+	if err2 != nil {
 		tx.Rollback()
 	}
 	tx.Commit()

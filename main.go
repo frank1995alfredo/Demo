@@ -1,19 +1,29 @@
 package main
 
 import (
-	config "github.com/frank1995alfredo/api/config"
-	database "github.com/frank1995alfredo/api/database"
+	"os"
+
 	rutas "github.com/frank1995alfredo/api/routes"
-	"github.com/gin-gonic/gin"
+	token "github.com/frank1995alfredo/api/token"
+	"github.com/go-redis/redis"
+	_ "github.com/go-redis/redis"
 )
 
 func main() {
-	r := gin.Default()
-	r.Use(config.CORS)
-
-	database.ConectorBD()
-	defer database.DB.Close()
-
 	rutas.Rutas()
-	r.Run()
+
+}
+func init() {
+	//Initializing redis
+	dsn := os.Getenv("REDIS_DSN")
+	if len(dsn) == 0 {
+		dsn = "localhost:6379"
+	}
+	token.Client = redis.NewClient(&redis.Options{
+		Addr: dsn, //redis port
+	})
+	_, err := token.Client.Ping().Result()
+	if err != nil {
+		panic(err)
+	}
 }

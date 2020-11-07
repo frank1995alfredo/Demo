@@ -3,10 +3,15 @@ package config
 import (
 	"net/http"
 
+	//_ "github.com/dgrijalva/jwt-go"
+
 	_ "github.com/gin-contrib/cors" //gsdg
 
+	//metodos "github.com/frank1995alfredo/api/controllers/mantenimiento/metodos"
 	"github.com/gin-gonic/gin"
 )
+
+/*********************CORS*****************************************/
 
 // CORS Middleware
 func CORS(c *gin.Context) {
@@ -23,3 +28,16 @@ func CORS(c *gin.Context) {
 		c.AbortWithStatus(http.StatusOK)
 	}
 }
+
+//MetadataToken ...
+/*
+func MetadataToken() {
+
+	c := &gin.Context{}
+	_, err := metodos.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, "unauthorized ")
+		return
+	}
+}
+*/
