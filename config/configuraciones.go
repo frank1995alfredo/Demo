@@ -9,6 +9,7 @@ import (
 
 	//metodos "github.com/frank1995alfredo/api/controllers/mantenimiento/metodos"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 /*********************CORS*****************************************/
@@ -29,15 +30,14 @@ func CORS(c *gin.Context) {
 	}
 }
 
-//MetadataToken ...
-/*
-func MetadataToken() {
-
-	c := &gin.Context{}
-	_, err := metodos.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized ")
-		return
-	}
+//HashPassword ... encripta el password
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
-*/
+
+//CheckPasswordHash ... hace un check del password y el hash
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}

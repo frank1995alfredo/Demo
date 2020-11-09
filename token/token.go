@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/frank1995alfredo/api/config"
 	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
 	database "github.com/frank1995alfredo/api/database"
 	"github.com/frank1995alfredo/api/models/mantenimiento"
@@ -68,7 +69,7 @@ func CreateAuth(userid uint64, td *TokenDetails) error {
 //CreateToken ...
 func CreateToken(userid uint64) (*TokenDetails, error) {
 	td := &TokenDetails{}
-	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
+	td.AtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
 	td.AccessUuID = uuid.NewV4().String()
 
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
@@ -82,7 +83,7 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 	atClaims["access_uuid"] = td.AccessUuID
 	atClaims["user_id"] = userid
 	atClaims["exp"] = td.AtExpires
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	at := jwt.NewWithClaims(jwt.SigningMethodHS512, atClaims)
 	td.AccessToken, err = at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
 	if err != nil {
 		return nil, err
@@ -93,7 +94,7 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 	rtClaims["refresh_uuid"] = td.RefreshUuID
 	rtClaims["user_id"] = userid
 	rtClaims["exp"] = td.RtExpires
-	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS512, rtClaims)
 	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("REFRESH_SECRET")))
 	if err != nil {
 		return nil, err
@@ -103,7 +104,7 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 
 //Login ...
 func Login(c *gin.Context) {
-	var user mantenimiento.User
+	user := mantenimiento.User{}
 	var input inputsmantenimiento.UserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -111,28 +112,35 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	//verifica si el usuario existe y genera el token
-	if err := database.DB.Where("usuario=? AND password=?", input.Usuario, input.Password).First(&user).Error; err == nil {
-		ts, err := CreateToken(user.UsuarioID)
-		if err != nil {
-			c.JSON(http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+	database.DB.Select("password").Where("usuario=?", input.Usuario).Find(&user)
 
-		saveErr := CreateAuth(user.UsuarioID, ts)
+	pass := user.Password
+	hash := config.CheckPasswordHash(input.Password, pass)
 
-		if saveErr != nil {
-			c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
-			return
-		}
-		tokens := map[string]string{
-			"access_token":  ts.AccessToken,
-			"refresh_token": ts.RefreshToken,
-		}
-		c.SecureJSON(http.StatusOK, gin.H{"data": tokens})
+	if hash {
+		//verifica si el usuario existe y genera el token
+		if err := database.DB.Where("usuario=?", input.Usuario).First(&user).Error; err == nil {
+			ts, err := CreateToken(user.UsuarioID)
+			if err != nil {
+				c.JSON(http.StatusUnprocessableEntity, err.Error())
+				return
+			}
 
+			saveErr := CreateAuth(user.UsuarioID, ts)
+
+			if saveErr != nil {
+				c.JSON(http.StatusUnprocessableEntity, saveErr.Error())
+				return
+			}
+			tokens := map[string]string{
+				"access_token":  ts.AccessToken,
+				"refresh_token": ts.RefreshToken,
+			}
+			c.SecureJSON(http.StatusOK, gin.H{"data": tokens})
+
+		}
 	} else {
-		c.JSON(http.StatusUnauthorized, "Por favor, ingrese datos de usuario validos.")
+		c.JSON(http.StatusUnauthorized, "Usuario o contraceña no validos.")
 	}
 
 }

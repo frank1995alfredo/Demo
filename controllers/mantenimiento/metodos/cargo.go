@@ -32,7 +32,7 @@ func ObtenerCargo(c *gin.Context) {
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 
 	db := database.DB.Find(&cargo)
 

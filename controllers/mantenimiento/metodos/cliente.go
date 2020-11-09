@@ -61,7 +61,7 @@ func CrearCliente(c *gin.Context) {
 		return
 	}
 
-	//validams los inputs
+	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -138,11 +138,7 @@ func ActualizarCliente(c *gin.Context) {
 	}
 
 	//valido que los campos obligatorios no esten vacios
-	if input.CiuID == 0 ||
-		input.PriNombre == "" || input.SegNombre == "" ||
-		input.PriApellido == "" || input.SegApellido == "" ||
-		input.NumCedula == "" || input.CodigoCli == "" ||
-		input.Direccion == "" {
+	if input.ValidarEntrada() {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
 		return
 	}

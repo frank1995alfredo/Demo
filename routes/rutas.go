@@ -7,6 +7,7 @@ import (
 	practicas "github.com/frank1995alfredo/api/controllers/practicas"
 	database "github.com/frank1995alfredo/api/database"
 	token "github.com/frank1995alfredo/api/token"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +21,14 @@ func Rutas() {
 
 	r.POST("/login", token.Login)
 	r.POST("/logout", token.TokenAuthMiddleware(), token.Logout)
+
+	usuario := r.Group("/usuarios")
+	{
+		//usuario.GET("/obtenerUsuario", token.TokenAuthMiddleware(), mantenimiento.ObtenerProvincia)
+		usuario.POST("/crearUsuario", token.TokenAuthMiddleware(), mantenimiento.RegistrarUsuario)
+		usuario.PATCH("/activarUsuario/:id", token.TokenAuthMiddleware(), mantenimiento.ActivarUsuario)
+		usuario.PATCH("/desactivarUsuario/:id", token.TokenAuthMiddleware(), mantenimiento.DesactivarUsuario)
+	}
 
 	provincia := r.Group("/provincias")
 	{
