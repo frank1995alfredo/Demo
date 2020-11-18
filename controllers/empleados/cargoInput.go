@@ -1,4 +1,4 @@
-package inputsmantenimiento
+package empleados
 
 //CargoInput ...
 type CargoInput struct {

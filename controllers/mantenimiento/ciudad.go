@@ -1,4 +1,4 @@
-package metodos
+package mantenimiento
 
 import (
 	"net/http"
@@ -8,10 +8,9 @@ import (
 	"github.com/biezhi/gorm-paginator/pagination"
 	_ "github.com/biezhi/gorm-paginator/pagination" //paginador
 
-	inputsMantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,7 +54,7 @@ func ObtenerCiudad(c *gin.Context) {
 //CrearCiudad ... metodo para crear una provincia
 func CrearCiudad(c *gin.Context) {
 	//var ciudadId uint64
-	var input inputsMantenimiento.CiudadInput
+	var input CiudadInput
 	var ciu mantenimiento.Ciudad
 
 	//validamos los inputs
@@ -114,7 +113,7 @@ func BuscarCiudad(c *gin.Context) {
 //ActualizarCiudad ...
 func ActualizarCiudad(c *gin.Context) {
 
-	var input inputsMantenimiento.CiudadInput
+	var input CiudadInput
 	var ciu mantenimiento.Ciudad
 
 	//validamos la entrada de los datos

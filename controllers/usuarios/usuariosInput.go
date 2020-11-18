@@ -1,15 +1,14 @@
-package inputsmantenimiento
+package usuarios
 
-//UserInput ...
-type UserInput struct {
+//UsuarioInput ...
+type UsuarioInput struct {
 	Usuario  string `json:"usuario"`
 	Password string `json:"password"`
 	EmpID    uint   `json:"idempleado"`
-	Estado   bool   `json:"estado"`
 }
 
 //ValidarEntrada ...
-func (user *UserInput) ValidarEntrada() bool {
+func (user *UsuarioInput) ValidarEntrada() bool {
 	if user.Usuario == "" || user.Password == "" {
 		return true
 	}

@@ -1,14 +1,14 @@
-package metodos
+package mantenimiento
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+
+	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 
 	"github.com/gin-gonic/gin"
 )
@@ -51,7 +51,7 @@ func ObtenerDiscapacidad(c *gin.Context) {
 //CrearDiscapacidad ...
 func CrearDiscapacidad(c *gin.Context) {
 
-	var input inputsmantenimiento.DiscapacidadInput
+	var input DiscapacidadInput
 	var discap mantenimiento.Discapacidad
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
@@ -115,7 +115,7 @@ func BuscarDiscapacidad(c *gin.Context) {
 //ActualizarDiscapacidad ...
 func ActualizarDiscapacidad(c *gin.Context) {
 
-	var input inputsmantenimiento.DiscapacidadInput
+	var input DiscapacidadInput
 	var disc mantenimiento.Discapacidad
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos

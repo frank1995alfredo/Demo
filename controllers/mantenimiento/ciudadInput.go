@@ -1,4 +1,4 @@
-package inputsmantenimiento
+package mantenimiento
 
 //CiudadInput ...
 type CiudadInput struct {

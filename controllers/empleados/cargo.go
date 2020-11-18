@@ -1,14 +1,13 @@
-package metodos
+package empleados
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	inputsMantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+	token "github.com/frank1995alfredo/api/controllers/token"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,7 +49,7 @@ func ObtenerCargo(c *gin.Context) {
 //CrearCargo ...
 func CrearCargo(c *gin.Context) {
 
-	var input inputsMantenimiento.CargoInput
+	var input CargoInput
 	var carg mantenimiento.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
@@ -115,7 +114,7 @@ func BuscarCargo(c *gin.Context) {
 //ActualizarCargo ...
 func ActualizarCargo(c *gin.Context) {
 
-	var input inputsMantenimiento.CargoInput
+	var input CargoInput
 	var carg mantenimiento.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos

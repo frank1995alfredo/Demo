@@ -1,24 +1,22 @@
-package metodos
+package usuarios
 
 import (
 	"net/http"
 
 	config "github.com/frank1995alfredo/api/config"
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
-	database "github.com/frank1995alfredo/api/database"
-	"github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 
+	database "github.com/frank1995alfredo/api/database"
+	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
 	"github.com/gin-gonic/gin"
 )
 
 //RegistrarUsuario ...
 func RegistrarUsuario(c *gin.Context) {
-	var input inputsmantenimiento.UserInput
+	var input UsuarioInput
 	var user mantenimiento.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
+	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
@@ -42,7 +40,7 @@ func RegistrarUsuario(c *gin.Context) {
 	}
 
 	password, _ := config.HashPassword(input.Password)
-	usuario := mantenimiento.User{Usuario: input.Usuario, Password: password, EmpID: input.EmpID, Estado: input.Estado}
+	usuario := mantenimiento.User{Usuario: input.Usuario, Password: password, EmpID: input.EmpID, Estado: true}
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
@@ -63,7 +61,7 @@ func DesactivarUsuario(c *gin.Context) {
 	var user mantenimiento.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
+	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
@@ -77,7 +75,7 @@ func DesactivarUsuario(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.SecureJSON(http.StatusOK, gin.H{"data": "Usuario desactivado."})
+	c.SecureJSON(http.StatusOK, gin.H{"data": "Usuario ha desactivado correctamente."})
 }
 
 //ActivarUsuario ...
@@ -85,7 +83,7 @@ func ActivarUsuario(c *gin.Context) {
 	var user mantenimiento.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
+	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
@@ -99,5 +97,5 @@ func ActivarUsuario(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.SecureJSON(http.StatusOK, gin.H{"data": "Usuario Activado."})
+	c.SecureJSON(http.StatusOK, gin.H{"data": "Usuario ha sido activado correctamente."})
 }

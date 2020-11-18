@@ -1,4 +1,4 @@
-package inputsmantenimiento
+package clientes
 
 //ClienteInput ...
 type ClienteInput struct {

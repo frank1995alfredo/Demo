@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
+	token "github.com/frank1995alfredo/api/controllers/token"
 	rutas "github.com/frank1995alfredo/api/routes"
-	token "github.com/frank1995alfredo/api/token"
 	"github.com/go-redis/redis"
 	_ "github.com/go-redis/redis"
 )

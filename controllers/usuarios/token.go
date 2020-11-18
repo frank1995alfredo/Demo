@@ -1,4 +1,4 @@
-package token
+package usuarios
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/frank1995alfredo/api/config"
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+
 	database "github.com/frank1995alfredo/api/database"
 	"github.com/frank1995alfredo/api/models/mantenimiento"
 	"github.com/gin-gonic/gin"
@@ -105,16 +105,17 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 //Login ...
 func Login(c *gin.Context) {
 	user := mantenimiento.User{}
-	var input inputsmantenimiento.UserInput
+	var input usuarios.UsuarioInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Json no valido")
+		c.JSON(http.StatusUnprocessableEntity, "Se ha presentado un error, vuelva a ingrasar sus datos.")
 		return
 	}
 
 	database.DB.Select("password").Where("usuario=?", input.Usuario).Find(&user)
 
 	pass := user.Password
+	//hash me va a devolver un true o un false
 	hash := config.CheckPasswordHash(input.Password, pass)
 
 	if hash {

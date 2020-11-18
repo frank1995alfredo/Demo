@@ -1,14 +1,13 @@
-package metodos
+package empleados
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	inputsmantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+	token "github.com/frank1995alfredo/api/controllers/token"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +50,7 @@ func ObtenerEmpleado(c *gin.Context) {
 //CrearEmpleado ...
 func CrearEmpleado(c *gin.Context) {
 
-	var input inputsmantenimiento.EmpleadoInput
+	var input EmpleadoInput
 	var emp mantenimiento.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
@@ -121,7 +120,7 @@ func BuscarEmpleado(c *gin.Context) {
 //ActualizarEmpleado ...
 func ActualizarEmpleado(c *gin.Context) {
 
-	var input inputsmantenimiento.EmpleadoInput
+	var input EmpleadoInput
 	var emp mantenimiento.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos

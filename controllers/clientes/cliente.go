@@ -1,14 +1,13 @@
-package metodos
+package clientes
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	inputsMantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/inputsMantenimiento"
+	token "github.com/frank1995alfredo/api/controllers/token"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	token "github.com/frank1995alfredo/api/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +50,7 @@ func ObtenerCliente(c *gin.Context) {
 //CrearCliente ...
 func CrearCliente(c *gin.Context) {
 
-	var input inputsMantenimiento.ClienteInput
+	var input ClienteInput
 	var clien mantenimiento.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
@@ -121,7 +120,7 @@ func BuscarCliente(c *gin.Context) {
 //ActualizarCliente ...
 func ActualizarCliente(c *gin.Context) {
 
-	var input inputsMantenimiento.ClienteInput
+	var input ClienteInput
 	var clien mantenimiento.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos

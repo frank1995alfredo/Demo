@@ -3,10 +3,12 @@ package rutas
 import (
 	"github.com/frank1995alfredo/api/config"
 
-	mantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento/metodos"
-	practicas "github.com/frank1995alfredo/api/controllers/practicas"
+	clientes "github.com/frank1995alfredo/api/controllers/clientes"
+	empleados "github.com/frank1995alfredo/api/controllers/empleados"
+	mantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento"
+	token "github.com/frank1995alfredo/api/controllers/token"
+	usuarios "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
-	token "github.com/frank1995alfredo/api/token"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,9 +27,9 @@ func Rutas() {
 	usuario := r.Group("/usuarios")
 	{
 		//usuario.GET("/obtenerUsuario", token.TokenAuthMiddleware(), mantenimiento.ObtenerProvincia)
-		usuario.POST("/crearUsuario", token.TokenAuthMiddleware(), mantenimiento.RegistrarUsuario)
-		usuario.PATCH("/activarUsuario/:id", token.TokenAuthMiddleware(), mantenimiento.ActivarUsuario)
-		usuario.PATCH("/desactivarUsuario/:id", token.TokenAuthMiddleware(), mantenimiento.DesactivarUsuario)
+		usuario.POST("/crearUsuario", token.TokenAuthMiddleware(), usuarios.RegistrarUsuario)
+		usuario.PATCH("/activarUsuario/:id", token.TokenAuthMiddleware(), usuarios.ActivarUsuario)
+		usuario.PATCH("/desactivarUsuario/:id", token.TokenAuthMiddleware(), usuarios.DesactivarUsuario)
 	}
 
 	provincia := r.Group("/provincias")
@@ -59,38 +61,29 @@ func Rutas() {
 
 	cargo := r.Group("/cargos")
 	{
-		cargo.GET("/obtenerCargo", token.TokenAuthMiddleware(), mantenimiento.ObtenerCargo)
-		cargo.POST("/crearCargo", token.TokenAuthMiddleware(), mantenimiento.CrearCargo)
-		cargo.GET("/buscarCargo/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarCargo)
-		cargo.PATCH("/actualizarCargo/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarCargo)
-		cargo.DELETE("/eliminarCargo/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarCargo)
+		cargo.GET("/obtenerCargo", token.TokenAuthMiddleware(), empleados.ObtenerCargo)
+		cargo.POST("/crearCargo", token.TokenAuthMiddleware(), empleados.CrearCargo)
+		cargo.GET("/buscarCargo/:descripcion", token.TokenAuthMiddleware(), empleados.BuscarCargo)
+		cargo.PATCH("/actualizarCargo/:id", token.TokenAuthMiddleware(), empleados.ActualizarCargo)
+		cargo.DELETE("/eliminarCargo/:id", token.TokenAuthMiddleware(), empleados.EliminarCargo)
 	}
 
 	cliente := r.Group("/clientes")
 	{
-		cliente.GET("/obtenerCliente", token.TokenAuthMiddleware(), mantenimiento.ObtenerCliente)
-		cliente.POST("/crearCliente", token.TokenAuthMiddleware(), mantenimiento.CrearCliente)
-		cliente.GET("/buscarCliente/:numcedula", token.TokenAuthMiddleware(), mantenimiento.BuscarCliente)
-		cliente.PATCH("/actualizarCliente/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarCliente)
-		cliente.DELETE("/eliminarCliente/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarCliente)
+		cliente.GET("/obtenerCliente", token.TokenAuthMiddleware(), clientes.ObtenerCliente)
+		cliente.POST("/crearCliente", token.TokenAuthMiddleware(), clientes.CrearCliente)
+		cliente.GET("/buscarCliente/:numcedula", token.TokenAuthMiddleware(), clientes.BuscarCliente)
+		cliente.PATCH("/actualizarCliente/:id", token.TokenAuthMiddleware(), clientes.ActualizarCliente)
+		cliente.DELETE("/eliminarCliente/:id", token.TokenAuthMiddleware(), clientes.EliminarCliente)
 	}
 
 	empleado := r.Group("/empleados")
 	{
-		empleado.GET("/obtenerEmpleado", token.TokenAuthMiddleware(), mantenimiento.ObtenerEmpleado)
-		empleado.POST("/crearEmpleado", token.TokenAuthMiddleware(), mantenimiento.CrearEmpleado)
-		empleado.GET("/buscarEmpleado/:numcedula", token.TokenAuthMiddleware(), mantenimiento.BuscarEmpleado)
-		empleado.PATCH("/actualizarEmplado/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarEmpleado)
-		empleado.DELETE("/eliminarEmpleado/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarEmpleado)
-	}
-
-	persona := r.Group("/personas")
-	{
-		persona.GET("/obtenerCliente", practicas.ObtenerCliente)
-		persona.POST("/crearPersona", practicas.CrearPersona)
-		persona.GET("/buscarPersona/:apellido", practicas.BuscarPersona)
-		persona.PATCH("/actualizarPersona/:id", practicas.ActualizarPersona)
-		persona.DELETE("/eliminarPersona/:id", practicas.EliminarPersona)
+		empleado.GET("/obtenerEmpleado", token.TokenAuthMiddleware(), empleados.ObtenerEmpleado)
+		empleado.POST("/crearEmpleado", token.TokenAuthMiddleware(), empleados.CrearEmpleado)
+		empleado.GET("/buscarEmpleado/:numcedula", token.TokenAuthMiddleware(), empleados.BuscarEmpleado)
+		empleado.PATCH("/actualizarEmplado/:id", token.TokenAuthMiddleware(), empleados.ActualizarEmpleado)
+		empleado.DELETE("/eliminarEmpleado/:id", token.TokenAuthMiddleware(), empleados.EliminarEmpleado)
 	}
 
 	r.Run()

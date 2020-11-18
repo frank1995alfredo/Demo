@@ -1,4 +1,4 @@
-package inputsmantenimiento
+package mantenimiento
 
 //DiscapacidadInput ...
 type DiscapacidadInput struct {
