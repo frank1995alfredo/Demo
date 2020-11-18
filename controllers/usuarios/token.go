@@ -105,7 +105,7 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 //Login ...
 func Login(c *gin.Context) {
 	user := mantenimiento.User{}
-	var input usuarios.UsuarioInput
+	var input UsuarioInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, "Se ha presentado un error, vuelva a ingrasar sus datos.")

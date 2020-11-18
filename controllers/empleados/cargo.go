@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	token "github.com/frank1995alfredo/api/controllers/token"
+	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
 	"github.com/gin-gonic/gin"

@@ -6,7 +6,7 @@ import (
 	clientes "github.com/frank1995alfredo/api/controllers/clientes"
 	empleados "github.com/frank1995alfredo/api/controllers/empleados"
 	mantenimiento "github.com/frank1995alfredo/api/controllers/mantenimiento"
-	token "github.com/frank1995alfredo/api/controllers/token"
+	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	usuarios "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
 
