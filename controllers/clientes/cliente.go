@@ -7,7 +7,7 @@ import (
 	"github.com/biezhi/gorm-paginator/pagination"
 	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
-	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	cliente "github.com/frank1995alfredo/api/models/clientes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,7 @@ import (
 //ObtenerCliente ...
 func ObtenerCliente(c *gin.Context) {
 
-	var cliente []mantenimiento.Cliente
+	var cliente []cliente.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -51,7 +51,7 @@ func ObtenerCliente(c *gin.Context) {
 func CrearCliente(c *gin.Context) {
 
 	var input ClienteInput
-	var clien mantenimiento.Cliente
+	var clien cliente.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -78,7 +78,7 @@ func CrearCliente(c *gin.Context) {
 		return
 	}
 
-	cliente := mantenimiento.Cliente{DiscID: input.DiscID, CiuID: input.CiuID,
+	cliente := cliente.Cliente{DiscID: input.DiscID, CiuID: input.CiuID,
 		PriNombre: input.PriNombre, SegNombre: input.SegNombre,
 		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechaNac: input.FechaNac,
 		NumCedula: input.NumCedula, CodigoCli: input.CodigoCli, Direccion: input.Direccion,
@@ -100,7 +100,7 @@ func CrearCliente(c *gin.Context) {
 //BuscarCliente ...
 func BuscarCliente(c *gin.Context) {
 
-	var cliente mantenimiento.Cliente
+	var cliente cliente.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -121,7 +121,7 @@ func BuscarCliente(c *gin.Context) {
 func ActualizarCliente(c *gin.Context) {
 
 	var input ClienteInput
-	var clien mantenimiento.Cliente
+	var clien cliente.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -147,7 +147,7 @@ func ActualizarCliente(c *gin.Context) {
 		return
 	}
 
-	cliente := mantenimiento.Cliente{DiscID: input.DiscID, CiuID: input.CiuID,
+	cliente := cliente.Cliente{DiscID: input.DiscID, CiuID: input.CiuID,
 		PriNombre: input.PriNombre, SegNombre: input.SegNombre,
 		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechaNac: input.FechaNac,
 		NumCedula: input.NumCedula, CodigoCli: input.CodigoCli, Direccion: input.Direccion,
@@ -168,7 +168,7 @@ func ActualizarCliente(c *gin.Context) {
 //EliminarCliente ...
 func EliminarCliente(c *gin.Context) {
 
-	var cliente mantenimiento.Cliente
+	var cliente cliente.Cliente
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)

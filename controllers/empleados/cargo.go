@@ -7,7 +7,7 @@ import (
 	"github.com/biezhi/gorm-paginator/pagination"
 	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
-	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	cargo "github.com/frank1995alfredo/api/models/empleados"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +15,7 @@ import (
 
 //ObtenerCargo ...
 func ObtenerCargo(c *gin.Context) {
-	var cargo []mantenimiento.CargoEmp
+	var cargo []cargo.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -50,7 +50,7 @@ func ObtenerCargo(c *gin.Context) {
 func CrearCargo(c *gin.Context) {
 
 	var input CargoInput
-	var carg mantenimiento.CargoEmp
+	var carg cargo.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -77,7 +77,7 @@ func CrearCargo(c *gin.Context) {
 		return
 	}
 
-	cargo := mantenimiento.CargoEmp{Descripcion: input.Descripcion}
+	cargo := cargo.CargoEmp{Descripcion: input.Descripcion}
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
@@ -94,7 +94,7 @@ func CrearCargo(c *gin.Context) {
 //BuscarCargo ...
 func BuscarCargo(c *gin.Context) {
 
-	var cargo mantenimiento.CargoEmp
+	var cargo cargo.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -115,7 +115,7 @@ func BuscarCargo(c *gin.Context) {
 func ActualizarCargo(c *gin.Context) {
 
 	var input CargoInput
-	var carg mantenimiento.CargoEmp
+	var carg cargo.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -140,7 +140,7 @@ func ActualizarCargo(c *gin.Context) {
 		return
 	}
 
-	cargo := mantenimiento.CargoEmp{Descripcion: input.Descripcion}
+	cargo := cargo.CargoEmp{Descripcion: input.Descripcion}
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
@@ -156,7 +156,7 @@ func ActualizarCargo(c *gin.Context) {
 //EliminarCargo ...
 func EliminarCargo(c *gin.Context) {
 
-	var cargo mantenimiento.CargoEmp
+	var cargo cargo.CargoEmp
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)

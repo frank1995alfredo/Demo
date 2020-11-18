@@ -3,8 +3,12 @@ package models
 import (
 	"log"
 
-	"github.com/frank1995alfredo/api/models/mantenimiento"
+	cliente "github.com/frank1995alfredo/api/models/clientes"
+	cargo "github.com/frank1995alfredo/api/models/empleados"
+	empleado "github.com/frank1995alfredo/api/models/empleados"
+	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
 	"github.com/frank1995alfredo/api/models/practica"
+	usuario "github.com/frank1995alfredo/api/models/usuarios"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres" //asdads
@@ -29,22 +33,22 @@ func ConectorBD() {
 
 	bd.AutoMigrate(&mantenimiento.Discapacidad{})
 
-	bd.AutoMigrate(&mantenimiento.Cliente{})
-	bd.Model(&mantenimiento.Cliente{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
-	bd.Model(&mantenimiento.Cliente{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
+	bd.AutoMigrate(&cliente.Cliente{})
+	bd.Model(&cliente.Cliente{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
+	bd.Model(&cliente.Cliente{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
 
-	bd.AutoMigrate(&mantenimiento.CargoEmp{})
+	bd.AutoMigrate(&cargo.CargoEmp{})
 
-	bd.AutoMigrate(&mantenimiento.Empleado{})
-	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("cargo_emp_id", "cargo_emps(cargo_emp_id)", "SET NULL", "CASCADE")
-	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
-	bd.Model(&mantenimiento.Empleado{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
+	bd.AutoMigrate(&empleado.Empleado{})
+	bd.Model(&empleado.Empleado{}).AddForeignKey("cargo_emp_id", "cargo_emps(cargo_emp_id)", "SET NULL", "CASCADE")
+	bd.Model(&empleado.Empleado{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
+	bd.Model(&empleado.Empleado{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
 
 	bd.AutoMigrate(&practica.Contacto{}, &practica.Persona{})
 	bd.Model(&practica.Contacto{}).AddForeignKey("per_id", "personas(persona_id)", "SET NULL", "CASCADE")
 
-	bd.AutoMigrate(&mantenimiento.User{})
-	bd.Model(&mantenimiento.User{}).AddForeignKey("emp_id", "empleados(empleado_id)", "SET NULL", "CASCADE")
+	bd.AutoMigrate(&usuario.User{})
+	bd.Model(&usuario.User{}).AddForeignKey("emp_id", "empleados(empleado_id)", "SET NULL", "CASCADE")
 
 	log.Println("Migracion satisfactoria")
 

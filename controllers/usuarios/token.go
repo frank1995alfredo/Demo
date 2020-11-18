@@ -12,7 +12,7 @@ import (
 	"github.com/frank1995alfredo/api/config"
 
 	database "github.com/frank1995alfredo/api/database"
-	"github.com/frank1995alfredo/api/models/mantenimiento"
+	usuario "github.com/frank1995alfredo/api/models/usuarios"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/twinj/uuid"
@@ -104,7 +104,7 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 
 //Login ...
 func Login(c *gin.Context) {
-	user := mantenimiento.User{}
+	user := usuario.User{}
 	var input UsuarioInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {

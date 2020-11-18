@@ -1,4 +1,4 @@
-package mantenimiento
+package empleados
 
 //CargoEmp ...
 type CargoEmp struct {

@@ -6,14 +6,14 @@ import (
 	config "github.com/frank1995alfredo/api/config"
 
 	database "github.com/frank1995alfredo/api/database"
-	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	usuario "github.com/frank1995alfredo/api/models/usuarios"
 	"github.com/gin-gonic/gin"
 )
 
 //RegistrarUsuario ...
 func RegistrarUsuario(c *gin.Context) {
 	var input UsuarioInput
-	var user mantenimiento.User
+	var user usuario.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)
@@ -40,7 +40,7 @@ func RegistrarUsuario(c *gin.Context) {
 	}
 
 	password, _ := config.HashPassword(input.Password)
-	usuario := mantenimiento.User{Usuario: input.Usuario, Password: password, EmpID: input.EmpID, Estado: true}
+	usuario := usuario.User{Usuario: input.Usuario, Password: password, EmpID: input.EmpID, Estado: true}
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
@@ -58,7 +58,7 @@ func RegistrarUsuario(c *gin.Context) {
 
 //DesactivarUsuario ...
 func DesactivarUsuario(c *gin.Context) {
-	var user mantenimiento.User
+	var user usuario.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)
@@ -80,7 +80,7 @@ func DesactivarUsuario(c *gin.Context) {
 
 //ActivarUsuario ...
 func ActivarUsuario(c *gin.Context) {
-	var user mantenimiento.User
+	var user usuario.User
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)

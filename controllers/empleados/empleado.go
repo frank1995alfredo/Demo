@@ -7,7 +7,7 @@ import (
 	"github.com/biezhi/gorm-paginator/pagination"
 	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
-	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
+	empleado "github.com/frank1995alfredo/api/models/empleados"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,7 @@ import (
 //ObtenerEmpleado ...
 func ObtenerEmpleado(c *gin.Context) {
 
-	var empleado []mantenimiento.Empleado
+	var empleado []empleado.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -51,7 +51,7 @@ func ObtenerEmpleado(c *gin.Context) {
 func CrearEmpleado(c *gin.Context) {
 
 	var input EmpleadoInput
-	var emp mantenimiento.Empleado
+	var emp empleado.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -78,7 +78,7 @@ func CrearEmpleado(c *gin.Context) {
 		return
 	}
 
-	empleado := mantenimiento.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
+	empleado := empleado.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
 		CargoEmpID: input.CargoEmpID, PriNombre: input.PriNombre, SegNombre: input.SegNombre,
 		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechNac: input.FechNac,
 		NumCedula: input.NumCedula, CodigoEmp: input.CodigoEmp, Direccion: input.Direccion,
@@ -100,7 +100,7 @@ func CrearEmpleado(c *gin.Context) {
 //BuscarEmpleado ...
 func BuscarEmpleado(c *gin.Context) {
 
-	var empleado mantenimiento.Empleado
+	var empleado empleado.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -121,7 +121,7 @@ func BuscarEmpleado(c *gin.Context) {
 func ActualizarEmpleado(c *gin.Context) {
 
 	var input EmpleadoInput
-	var emp mantenimiento.Empleado
+	var emp empleado.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)
@@ -151,7 +151,7 @@ func ActualizarEmpleado(c *gin.Context) {
 		return
 	}
 
-	empleado := mantenimiento.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
+	empleado := empleado.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
 		CargoEmpID: input.CargoEmpID, PriNombre: input.PriNombre, SegNombre: input.SegNombre,
 		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechNac: input.FechNac,
 		NumCedula: input.NumCedula, CodigoEmp: input.CodigoEmp, Direccion: input.Direccion,
@@ -172,7 +172,7 @@ func ActualizarEmpleado(c *gin.Context) {
 //EliminarEmpleado ...
 func EliminarEmpleado(c *gin.Context) {
 
-	var emp mantenimiento.Empleado
+	var emp empleado.Empleado
 
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := token.ExtractTokenMetadata(c.Request)

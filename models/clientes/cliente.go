@@ -1,4 +1,4 @@
-package mantenimiento
+package clientes
 
 //Cliente ...
 type Cliente struct {
