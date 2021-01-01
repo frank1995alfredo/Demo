@@ -24,67 +24,63 @@ func Rutas() {
 	r.POST("/login", token.Login)
 	r.POST("/logout", token.TokenAuthMiddleware(), token.Logout)
 
-	usuario := r.Group("/usuarios")
+	usuario := r.Group("/security")
 	{
 		//usuario.GET("/obtenerUsuario", token.TokenAuthMiddleware(), mantenimiento.ObtenerProvincia)
-		usuario.POST("/crearUsuario", token.TokenAuthMiddleware(), usuarios.RegistrarUsuario)
-		usuario.PATCH("/activarUsuario/:id", token.TokenAuthMiddleware(), usuarios.ActivarUsuario)
-		usuario.PATCH("/desactivarUsuario/:id", token.TokenAuthMiddleware(), usuarios.DesactivarUsuario)
+		usuario.POST("/user", token.TokenAuthMiddleware(), usuarios.RegistrarUsuario)
+		usuario.PATCH("/user/:id", token.TokenAuthMiddleware(), usuarios.ActivarUsuario)
+		usuario.PATCH("/iuser/:id", token.TokenAuthMiddleware(), usuarios.DesactivarUsuario)
 	}
-
-	provincia := r.Group("/provincias")
+	rutes := r.Group("/api/index.php/model")
 	{
-		provincia.GET("/obtenerProvincia", token.TokenAuthMiddleware(), mantenimiento.ObtenerProvincia)
-		provincia.POST("/crearProvincia", token.TokenAuthMiddleware(), mantenimiento.CrearProvincia)
-		provincia.GET("/buscarProvincia/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarProvincia)
-		provincia.PATCH("/actualizarProvincia/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarProvincia)
-		provincia.DELETE("/eliminarProvincia/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarProvincia)
-	}
 
-	ciudad := r.Group("/ciudades")
-	{
-		ciudad.GET("/obtenerCiudad", token.TokenAuthMiddleware(), mantenimiento.ObtenerCiudad)
-		ciudad.POST("/crearCiudad", token.TokenAuthMiddleware(), mantenimiento.CrearCiudad)
-		ciudad.GET("/buscarCiudad/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarCiudad)
-		ciudad.PATCH("/actualizarCiudad/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarCiudad)
-		ciudad.DELETE("/eliminarCiudad/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarCiudad)
-	}
+		//PROVINCIA
+		rutes.GET("/provinces", token.TokenAuthMiddleware(), mantenimiento.ObtenerProvincia)
+		rutes.POST("/sendprovinces" /*token.TokenAuthMiddleware(),*/, mantenimiento.CrearProvincia)
+		rutes.GET("/getprovinces/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarProvincia)
+		rutes.PATCH("/patchprovinces/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarProvincia)
+		rutes.DELETE("/delprovinces/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarProvincia)
 
-	discapacidad := r.Group("/discapacidades")
-	{
-		discapacidad.GET("/obtenerDiscapacidad", token.TokenAuthMiddleware(), mantenimiento.ObtenerDiscapacidad)
-		discapacidad.POST("/crearDiscapacidad", token.TokenAuthMiddleware(), mantenimiento.CrearDiscapacidad)
-		discapacidad.GET("/buscarDiscapacidad/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarDiscapacidad)
-		discapacidad.PATCH("/actualizarDiscapacidad/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarDiscapacidad)
-		discapacidad.DELETE("/eliminarDiscapacidad/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarDiscapacidad)
-	}
+		//CIUDAD
+		rutes.GET("/cities", mantenimiento.ObtenerCiudad)
+		rutes.POST("/sendcities", mantenimiento.CrearCiudad)
+		rutes.GET("/getcities/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarCiudad)
+		rutes.PATCH("/patchcities/:id", mantenimiento.ActualizarCiudad)
+		rutes.DELETE("/delcities/:id", mantenimiento.EliminarCiudad)
 
-	cargo := r.Group("/cargos")
-	{
-		cargo.GET("/obtenerCargo", token.TokenAuthMiddleware(), empleados.ObtenerCargo)
-		cargo.POST("/crearCargo", token.TokenAuthMiddleware(), empleados.CrearCargo)
-		cargo.GET("/buscarCargo/:descripcion", token.TokenAuthMiddleware(), empleados.BuscarCargo)
-		cargo.PATCH("/actualizarCargo/:id", token.TokenAuthMiddleware(), empleados.ActualizarCargo)
-		cargo.DELETE("/eliminarCargo/:id", token.TokenAuthMiddleware(), empleados.EliminarCargo)
-	}
+		//DISCAPACIDAD
+		rutes.GET("/disabilities", token.TokenAuthMiddleware(), mantenimiento.ObtenerDiscapacidad)
+		rutes.POST("/senddisabilities", token.TokenAuthMiddleware(), mantenimiento.CrearDiscapacidad)
+		rutes.GET("/getdisabilities/:descripcion", token.TokenAuthMiddleware(), mantenimiento.BuscarDiscapacidad)
+		rutes.PATCH("/patchdisabilities/:id", token.TokenAuthMiddleware(), mantenimiento.ActualizarDiscapacidad)
+		rutes.DELETE("/deldisabilities/:id", token.TokenAuthMiddleware(), mantenimiento.EliminarDiscapacidad)
 
-	cliente := r.Group("/clientes")
-	{
-		cliente.GET("/obtenerCliente", token.TokenAuthMiddleware(), clientes.ObtenerCliente)
-		cliente.POST("/crearCliente", token.TokenAuthMiddleware(), clientes.CrearCliente)
-		cliente.GET("/buscarCliente/:numcedula", token.TokenAuthMiddleware(), clientes.BuscarCliente)
-		cliente.PATCH("/actualizarCliente/:id", token.TokenAuthMiddleware(), clientes.ActualizarCliente)
-		cliente.DELETE("/eliminarCliente/:id", token.TokenAuthMiddleware(), clientes.EliminarCliente)
-	}
+		//CARGO
+		rutes.GET("/positions" /*token.TokenAuthMiddleware(),*/, empleados.ObtenerCargo)
+		rutes.POST("/sendpositions", token.TokenAuthMiddleware(), empleados.CrearCargo)
+		rutes.GET("/getpositions/:descripcion", token.TokenAuthMiddleware(), empleados.BuscarCargo)
+		rutes.PATCH("/patchpositions/:id", token.TokenAuthMiddleware(), empleados.ActualizarCargo)
+		rutes.DELETE("/delpositions/:id", token.TokenAuthMiddleware(), empleados.EliminarCargo)
 
-	empleado := r.Group("/empleados")
-	{
-		empleado.GET("/obtenerEmpleado", token.TokenAuthMiddleware(), empleados.ObtenerEmpleado)
-		empleado.POST("/crearEmpleado", token.TokenAuthMiddleware(), empleados.CrearEmpleado)
-		empleado.GET("/buscarEmpleado/:numcedula", token.TokenAuthMiddleware(), empleados.BuscarEmpleado)
-		empleado.PATCH("/actualizarEmplado/:id", token.TokenAuthMiddleware(), empleados.ActualizarEmpleado)
-		empleado.DELETE("/eliminarEmpleado/:id", token.TokenAuthMiddleware(), empleados.EliminarEmpleado)
-	}
+		//CLIENTE
+		rutes.GET("/clients", token.TokenAuthMiddleware(), clientes.ObtenerCliente)
+		rutes.POST("/sendclients", token.TokenAuthMiddleware(), clientes.CrearCliente)
+		rutes.GET("/getclients/:numcedula", token.TokenAuthMiddleware(), clientes.BuscarCliente)
+		rutes.PATCH("/patchclients/:id", token.TokenAuthMiddleware(), clientes.ActualizarCliente)
+		rutes.DELETE("/delclients/:id", token.TokenAuthMiddleware(), clientes.EliminarCliente)
 
+		//EMPLEADO
+		rutes.GET("/employees" /*token.TokenAuthMiddleware(),*/, empleados.ObtenerEmpleado)
+		rutes.POST("/sendemployees" /*token.TokenAuthMiddleware(),*/, empleados.CrearEmpleado)
+		rutes.GET("/getemployees/:valor" /*token.TokenAuthMiddleware(),*/, empleados.BuscarEmpleado)
+		rutes.PATCH("/patchemployees/:id" /*token.TokenAuthMiddleware(),*/, empleados.ActualizarEmpleado)
+		rutes.DELETE("/delemployees/:id" /*token.TokenAuthMiddleware(),*/, empleados.EliminarEmpleado)
+
+		/*	rutes.GET("/persona", personas.ObtenerPersona)
+			rutes.POST("/persona", personas.CrearPersona)
+			rutes.GET("/buscarpersona/:id", personas.BuscarPersona)
+			rutes.PATCH("/modificarpersona/:id", personas.ModificarPersona)
+			rutes.DELETE("/persona/:id", personas.EliminarPersona) */
+	}
 	r.Run()
 }

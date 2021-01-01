@@ -5,34 +5,40 @@ import (
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
+	token "github.com/frank1995alfredo/api/functions"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
 	"github.com/gin-gonic/gin"
 )
 
 /**************METODOS PARA PROVINCIA*******************/
 
+// ValidarEntradaInput ... VALIDAMOS LOS JSON
+func ValidarEntradaInput() {
+	c := gin.Context{}
+	var inp token.InputGlobal
+
+	if err := c.ShouldBindJSON(&inp); err != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+}
+
 //ObtenerProvincia ... metodo para obtener todas las provincias
 func ObtenerProvincia(c *gin.Context) {
 
 	var provincia []mantenimiento.Provincia
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	err2 := database.DB.Order("provincia_id").Find(&provincia).Error
 	if err2 != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err2.Error})
 		return
 	}
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 
 	db := database.DB.Where("estado=?", true).Find(&provincia)
 
@@ -50,32 +56,22 @@ func ObtenerProvincia(c *gin.Context) {
 //CrearProvincia ... metodo para crear una provincia
 func CrearProvincia(c *gin.Context) {
 
-	var input ProvinciaInput
+	var inp token.InputGlobal
 	var provinc mantenimiento.Provincia
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-	//validaops los inputs
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//token.ValidarToken()
+
+	if err := c.ShouldBindJSON(&inp); err != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if input.ValidarEntrada() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ingrese una descripción"})
+	if err := database.DB.Where("descripcion=?", inp.Descripcion).First(&provinc).Error; err == nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ya existe esta provincia, ingrese otra."})
 		return
 	}
 
-	if err := database.DB.Where("descripcion=?", input.Descripcion).First(&provinc).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe esta provincia, ingrese otra."})
-		return
-	}
-
-	provincia := mantenimiento.Provincia{Descripcion: input.Descripcion, Estado: input.Estado}
+	provincia := mantenimiento.Provincia{Descripcion: inp.Descripcion, Estado: inp.Estado}
 
 	tx := database.DB.Begin()
 	err2 := tx.Create(&provincia).Error //si no hay un error, se guarda el articulo
@@ -92,19 +88,14 @@ func BuscarProvincia(c *gin.Context) {
 
 	var provinc mantenimiento.Provincia
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	if err := database.DB.Where("descripcion=?", c.Param("descripcion")).First(&provinc).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe esta provincia."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "No existe esta provincia."})
 		return
 	}
 
-	c.SecureJSON(http.StatusFound, gin.H{"data": provinc})
+	c.SecureJSON(http.StatusOK, gin.H{"data": provinc})
 }
 
 //ActualizarProvincia ...
@@ -113,21 +104,16 @@ func ActualizarProvincia(c *gin.Context) {
 	var input ProvinciaInput
 	var provinc mantenimiento.Provincia
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := database.DB.Where("provincia_id=?", c.Param("id")).First(&provinc).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Provincia no encontrada."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Provincia no encontrada."})
 		return
 	}
 
@@ -142,7 +128,7 @@ func ActualizarProvincia(c *gin.Context) {
 	tx.Commit()
 	//fin de la transaccion
 
-	c.SecureJSON(http.StatusCreated, gin.H{"data": provinc})
+	c.SecureJSON(http.StatusOK, gin.H{"data": provinc})
 }
 
 //EliminarProvincia ...
@@ -150,12 +136,7 @@ func EliminarProvincia(c *gin.Context) {
 
 	var provincia mantenimiento.Provincia
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()

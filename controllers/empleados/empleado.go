@@ -4,191 +4,99 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/biezhi/gorm-paginator/pagination"
-	token "github.com/frank1995alfredo/api/controllers/usuarios"
-	database "github.com/frank1995alfredo/api/database"
-	empleado "github.com/frank1995alfredo/api/models/empleados"
+	empleados "github.com/frank1995alfredo/api/class/empleado"
+	input "github.com/frank1995alfredo/api/functions"
+	token "github.com/frank1995alfredo/api/functions"
 	"github.com/gin-gonic/gin"
 )
+
+var inp input.InputGlobal
 
 /**************METODO PARA EMPLEADO******************/
 
 //ObtenerEmpleado ...
 func ObtenerEmpleado(c *gin.Context) {
 
-	var empleado []empleado.Empleado
+	empleado := new(empleados.Empleado)
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-
-	err2 := database.DB.Find(&empleado).Error
-	if err2 != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-		return
-	}
+	token.ValidarToken()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	db := database.DB.Where("estado=?", true).Find(&empleado)
+	emp := empleado.ObtenerEmpleados(page, limit)
 
-	paginator := pagination.Paging(&pagination.Param{
-		DB:      db,
-		Page:    page,
-		Limit:   limit,
-		OrderBy: []string{"empleado_id asc"},
-		ShowSQL: false,
-	}, &empleado)
-	c.SecureJSON(http.StatusOK, gin.H{"data": paginator})
+	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
 }
 
 //CrearEmpleado ...
 func CrearEmpleado(c *gin.Context) {
 
-	var input EmpleadoInput
-	var emp empleado.Empleado
+	empleado := new(empleados.Empleado)
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-
-	//validams los inputs
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//validaops los inputs
+	if err := c.ShouldBindJSON(&inp); err != nil {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//valido que los campos obligatorios no esten vacios
-	if input.ValidarEntrada() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
+	if inp.IngresarEmpleadoInput() {
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
 		return
 	}
 
-	//pregunto si el cliente existe en la base de datos
-	if err := database.DB.Where("num_cedula=?", input.NumCedula).First(&emp).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe este empleado con el mismo número de cédula, ingrese otro."})
-		return
-	}
+	emp := empleado.CrearEmpleado(inp.DiscID, inp.CiuID, inp.PriNombre, inp.SegNombre, inp.PriApellido, inp.SegApellido,
+		inp.FechaNac, inp.NumCedula, inp.Direccion, inp.Email, inp.Telefono, inp.Genero, true,
+		inp.NivelDis, inp.CargoEmpID, inp.CodigoEmp, inp.Foto)
 
-	empleado := empleado.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
-		CargoEmpID: input.CargoEmpID, PriNombre: input.PriNombre, SegNombre: input.SegNombre,
-		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechNac: input.FechNac,
-		NumCedula: input.NumCedula, CodigoEmp: input.CodigoEmp, Direccion: input.Direccion,
-		Email: input.Email, Telefono: input.Telefono, Genero: input.Genero, Estado: input.Estado,
-		Foto: input.Foto, NivelDis: input.NivelDis}
+	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
-	//inicio de la transaccion
-	tx := database.DB.Begin()
-	err2 := tx.Create(&empleado).Error //si no hay un error, se guarda el articulo
-	if err2 != nil {
-		tx.Rollback()
-	}
-	tx.Commit()
-	//fin de la transaccion
-
-	c.SecureJSON(http.StatusOK, gin.H{"data": empleado})
 }
 
 //BuscarEmpleado ...
 func BuscarEmpleado(c *gin.Context) {
 
-	var empleado empleado.Empleado
+	empleado := new(empleados.Empleado)
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+	//token.ValidarToken()
+
+	emp, err := empleado.BuscarEmpleado(c.Param("valor"))
+
+	if err != "" {
+		c.SecureJSON(http.StatusOK, gin.H{"error": err})
 		return
 	}
 
-	if err := database.DB.Where("num_cedula=?", c.Param("numcedula")).First(&empleado).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe este empleado."})
-		return
-	}
+	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
-	c.SecureJSON(http.StatusFound, gin.H{"data": empleado})
 }
 
 //ActualizarEmpleado ...
 func ActualizarEmpleado(c *gin.Context) {
 
-	var input EmpleadoInput
-	var emp empleado.Empleado
-
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validamos la entrada de los datos
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&inp); err != nil {
+		c.SecureJSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
-	//valido que los camplos obligatorios no esten vacios
-	if input.CiuID == 0 || input.DiscID == 0 ||
-		input.CargoEmpID == 0 || input.PriNombre == "" ||
-		input.SegNombre == "" || input.PriApellido == "" ||
-		input.SegApellido == "" || input.NumCedula == "" ||
-		input.CodigoEmp == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
-		return
-	}
+	c.SecureJSON(http.StatusCreated, gin.H{"data": "ggdf"})
 
-	if err := database.DB.Where("empleado_id=?", c.Param("id")).First(&emp).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Empleado no encontrada."})
-		return
-	}
-
-	empleado := empleado.Empleado{DiscID: input.DiscID, CiuID: input.CiuID,
-		CargoEmpID: input.CargoEmpID, PriNombre: input.PriNombre, SegNombre: input.SegNombre,
-		PriApellido: input.PriApellido, SegApellido: input.SegApellido, FechNac: input.FechNac,
-		NumCedula: input.NumCedula, CodigoEmp: input.CodigoEmp, Direccion: input.Direccion,
-		Email: input.Email, Telefono: input.Telefono, Genero: input.Genero, Estado: input.Estado,
-		Foto: input.Foto, NivelDis: input.NivelDis}
-
-	//inicio de la transaccion
-	tx := database.DB.Begin()
-	err2 := tx.Model(&emp).Where("empleado_id=?", c.Param("id")).Update(empleado).Error
-	if err2 != nil {
-		tx.Rollback()
-	}
-	tx.Commit()
-
-	c.SecureJSON(http.StatusCreated, gin.H{"data": empleado})
 }
 
 //EliminarEmpleado ...
 func EliminarEmpleado(c *gin.Context) {
 
-	var emp empleado.Empleado
+	//token.ValidarToken()
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	empleado := new(empleados.Empleado)
 
-	tx := database.DB.Begin()
-	err2 := tx.Model(&emp).Where("empleado_id=?", c.Param("id")).Update("estado", false).Error
-	if err2 != nil {
-		tx.Rollback()
-	}
-	tx.Commit()
-	//fin de la transaccion
+	emp := empleado.EliminarEmpleado(c.Param("id"))
 
-	c.SecureJSON(http.StatusOK, gin.H{"data": "Registro eliminado."})
+	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
 }

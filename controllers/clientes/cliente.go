@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
+	token "github.com/frank1995alfredo/api/functions"
 	cliente "github.com/frank1995alfredo/api/models/clientes"
 	"github.com/gin-gonic/gin"
 )
@@ -18,21 +18,10 @@ func ObtenerCliente(c *gin.Context) {
 
 	var cliente []cliente.Cliente
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-
-	err2 := database.DB.Find(&cliente).Error
-	if err2 != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-		return
-	}
+	token.ValidarToken()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
 	db := database.DB.Find(&cliente)
 
@@ -53,28 +42,23 @@ func CrearCliente(c *gin.Context) {
 	var input ClienteInput
 	var clien cliente.Cliente
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//valido que los camplos obligatorios no esten vacios
 	if input.ValidarEntrada() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
 		return
 	}
 
 	//pregunto si el cliente existe en la base de datos
 	if err := database.DB.Where("num_cedula=?", input.NumCedula).First(&clien).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe este cliente con el mismo número de cédula, ingrese otro."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ya existe este cliente con el mismo número de cédula, ingrese otro."})
 		return
 	}
 
@@ -102,19 +86,14 @@ func BuscarCliente(c *gin.Context) {
 
 	var cliente cliente.Cliente
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	if err := database.DB.Where("num_cedula=?", c.Param("numcedula")).First(&cliente).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe este cliente."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "No existe este cliente."})
 		return
 	}
 
-	c.SecureJSON(http.StatusFound, gin.H{"data": cliente})
+	c.SecureJSON(http.StatusOK, gin.H{"data": cliente})
 }
 
 //ActualizarCliente ...
@@ -123,27 +102,22 @@ func ActualizarCliente(c *gin.Context) {
 	var input ClienteInput
 	var clien cliente.Cliente
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
 	//valido que los campos obligatorios no esten vacios
 	if input.ValidarEntrada() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
 		return
 	}
 
 	if err := database.DB.Where("cliente_id=?", c.Param("id")).First(&clien).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cliente no encontrado."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Cliente no encontrado."})
 		return
 	}
 
@@ -162,7 +136,7 @@ func ActualizarCliente(c *gin.Context) {
 	}
 	tx.Commit()
 
-	c.SecureJSON(http.StatusCreated, gin.H{"data": cliente})
+	c.SecureJSON(http.StatusOK, gin.H{"data": cliente})
 }
 
 //EliminarCliente ...
@@ -170,12 +144,7 @@ func EliminarCliente(c *gin.Context) {
 
 	var cliente cliente.Cliente
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()

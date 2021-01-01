@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/biezhi/gorm-paginator/pagination"
-	token "github.com/frank1995alfredo/api/controllers/usuarios"
 	database "github.com/frank1995alfredo/api/database"
+	token "github.com/frank1995alfredo/api/functions"
 	cargo "github.com/frank1995alfredo/api/models/empleados"
 	"github.com/gin-gonic/gin"
 )
@@ -17,21 +17,10 @@ import (
 func ObtenerCargo(c *gin.Context) {
 	var cargo []cargo.CargoEmp
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-
-	err2 := database.DB.Order("cargo_emp_id").Find(&cargo).Error
-	if err2 != nil {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error})
-		return
-	}
+	token.ValidarToken()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
 	db := database.DB.Find(&cargo)
 
@@ -52,28 +41,23 @@ func CrearCargo(c *gin.Context) {
 	var input CargoInput
 	var carg cargo.CargoEmp
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validaops los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//valido que la descripcion no este vacia
 	if input.Descripcion == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ingrese una descripción."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ingrese una descripción."})
 		return
 	}
 
 	//pregunto si este cargo existe en la base de datos
 	if err := database.DB.Where("descripcion=?", input.Descripcion).First(&carg).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe este cargo, ingrese otro."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ya existe este cargo, ingrese otro."})
 		return
 	}
 
@@ -96,15 +80,10 @@ func BuscarCargo(c *gin.Context) {
 
 	var cargo cargo.CargoEmp
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	if err := database.DB.Where("descripcion=?", c.Param("descripcion")).First(&cargo).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No existe este cargo."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "No existe este cargo."})
 		return
 	}
 
@@ -117,26 +96,21 @@ func ActualizarCargo(c *gin.Context) {
 	var input CargoInput
 	var carg cargo.CargoEmp
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
+	token.ValidarToken()
 
 	//validamos la entrada de los datos
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
 	if input.Descripcion == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ingrese una descripción."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ingrese una descripción."})
 		return
 	}
 
 	if err := database.DB.Where("cargo_emp_id=?", c.Param("id")).First(&carg).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Cargo no encontrada."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Cargo no encontrada."})
 		return
 	}
 
@@ -158,13 +132,7 @@ func EliminarCargo(c *gin.Context) {
 
 	var cargo cargo.CargoEmp
 
-	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
-	_, err := token.ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
-		return
-	}
-
+	token.ValidarToken()
 	//inicio de la transaccion
 	tx := database.DB.Begin()
 	err2 := tx.Where("cargo_emp_id=?", c.Param("id")).Delete(&cargo).Error

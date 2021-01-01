@@ -3,11 +3,11 @@ package models
 import (
 	"log"
 
+	"github.com/frank1995alfredo/api/class/persona"
 	cliente "github.com/frank1995alfredo/api/models/clientes"
 	cargo "github.com/frank1995alfredo/api/models/empleados"
 	empleado "github.com/frank1995alfredo/api/models/empleados"
 	mantenimiento "github.com/frank1995alfredo/api/models/mantenimiento"
-	"github.com/frank1995alfredo/api/models/practica"
 	usuario "github.com/frank1995alfredo/api/models/usuarios"
 
 	"github.com/jinzhu/gorm"
@@ -44,11 +44,10 @@ func ConectorBD() {
 	bd.Model(&empleado.Empleado{}).AddForeignKey("ciu_id", "ciudads(ciudad_id)", "SET NULL", "CASCADE")
 	bd.Model(&empleado.Empleado{}).AddForeignKey("disc_id", "discapacidads(discapacidad_id)", "SET NULL", "CASCADE")
 
-	bd.AutoMigrate(&practica.Contacto{}, &practica.Persona{})
-	bd.Model(&practica.Contacto{}).AddForeignKey("per_id", "personas(persona_id)", "SET NULL", "CASCADE")
-
 	bd.AutoMigrate(&usuario.User{})
 	bd.Model(&usuario.User{}).AddForeignKey("emp_id", "empleados(empleado_id)", "SET NULL", "CASCADE")
+
+	bd.AutoMigrate(&persona.Persona{})
 
 	log.Println("Migracion satisfactoria")
 

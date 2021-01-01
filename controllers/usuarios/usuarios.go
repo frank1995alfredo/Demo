@@ -18,29 +18,29 @@ func RegistrarUsuario(c *gin.Context) {
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		c.SecureJSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
 	}
 
 	//validamos los inputs
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if input.ValidarEntrada() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ingrese un usuario y una contraceña."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ingrese un usuario y una contraceña."})
 		return
 	}
 
 	//pregunto si ese usuario existe en la base de datos
 	if err := database.DB.Where("usuario LIKE ?", input.Usuario).First(&user).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ya existe este usuario, ingrese otro."})
+		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Ya existe este usuario, ingrese otro."})
 		return
 	}
 
 	password, _ := config.HashPassword(input.Password)
-	usuario := usuario.User{Usuario: input.Usuario, Password: password, EmpID: input.EmpID, Estado: true}
+	usuario := usuario.User{Usuario: input.Usuario, Password: password, Estado: true}
 
 	//inicio de la transaccion
 	tx := database.DB.Begin()
@@ -63,7 +63,7 @@ func DesactivarUsuario(c *gin.Context) {
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		c.SecureJSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
 	}
 
@@ -85,7 +85,7 @@ func ActivarUsuario(c *gin.Context) {
 	//se extrae los metadatos del token, si se esta autenticado, se presentaran los datos
 	_, err := ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
+		c.SecureJSON(http.StatusUnauthorized, "No tiene permisos necesarios.")
 		return
 	}
 
