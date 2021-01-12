@@ -6,11 +6,8 @@ import (
 
 	empleados "github.com/frank1995alfredo/api/class/empleado"
 	input "github.com/frank1995alfredo/api/functions"
-	token "github.com/frank1995alfredo/api/functions"
 	"github.com/gin-gonic/gin"
 )
-
-var inp input.InputGlobal
 
 /**************METODO PARA EMPLEADO******************/
 
@@ -19,7 +16,7 @@ func ObtenerEmpleado(c *gin.Context) {
 
 	empleado := new(empleados.Empleado)
 
-	token.ValidarToken()
+	//token.ValidarToken()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
@@ -33,23 +30,21 @@ func ObtenerEmpleado(c *gin.Context) {
 //CrearEmpleado ...
 func CrearEmpleado(c *gin.Context) {
 
+	var Inp input.InputGlobal
+
 	empleado := new(empleados.Empleado)
 
 	//validaops los inputs
-	if err := c.ShouldBindJSON(&inp); err != nil {
+	if err := c.ShouldBindJSON(&Inp); err != nil {
 		c.SecureJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	//valido que los campos obligatorios no esten vacios
-	if inp.IngresarEmpleadoInput() {
-		c.SecureJSON(http.StatusBadRequest, gin.H{"error": "Por favor, ingrese los campos que son obligatorios."})
-		return
-	}
+	//token.ValidarToken()
 
-	emp := empleado.CrearEmpleado(inp.DiscID, inp.CiuID, inp.PriNombre, inp.SegNombre, inp.PriApellido, inp.SegApellido,
-		inp.FechaNac, inp.NumCedula, inp.Direccion, inp.Email, inp.Telefono, inp.Genero, true,
-		inp.NivelDis, inp.CargoEmpID, inp.CodigoEmp, inp.Foto)
+	emp := empleado.CrearEmpleado(Inp.DiscID, Inp.CiuID, Inp.PriNombre, Inp.SegNombre, Inp.PriApellido,
+		Inp.SegApellido, Inp.FechaNac, Inp.NumCedula, Inp.Direccion, Inp.Email, Inp.Telefono,
+		Inp.Genero, true, Inp.NivelDis, Inp.CargoEmpID, Inp.CodigoEmp, Inp.Foto)
 
 	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
@@ -76,15 +71,22 @@ func BuscarEmpleado(c *gin.Context) {
 //ActualizarEmpleado ...
 func ActualizarEmpleado(c *gin.Context) {
 
-	token.ValidarToken()
+	var Inp input.InputGlobal
+
+	empleado := new(empleados.Empleado)
+	//token.ValidarToken()
 
 	//validamos la entrada de los datos
-	if err := c.ShouldBindJSON(&inp); err != nil {
+	if err := c.ShouldBindJSON(&Inp); err != nil {
 		c.SecureJSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.SecureJSON(http.StatusCreated, gin.H{"data": "ggdf"})
+	emp := empleado.ActualizarEmpleado(c.Param("id"), Inp.DiscID, Inp.CiuID, Inp.PriNombre, Inp.SegNombre,
+		Inp.PriApellido, Inp.SegApellido, Inp.FechaNac, Inp.NumCedula, Inp.Direccion, Inp.Email,
+		Inp.Telefono, Inp.Genero, Inp.Estado, Inp.NivelDis, Inp.CargoEmpID, Inp.CodigoEmp, Inp.Foto)
+
+	c.SecureJSON(http.StatusOK, gin.H{"data": emp})
 
 }
 

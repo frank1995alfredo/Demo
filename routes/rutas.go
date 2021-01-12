@@ -63,11 +63,11 @@ func Rutas() {
 		rutes.DELETE("/delpositions/:id", token.TokenAuthMiddleware(), empleados.EliminarCargo)
 
 		//CLIENTE
-		rutes.GET("/clients", token.TokenAuthMiddleware(), clientes.ObtenerCliente)
-		rutes.POST("/sendclients", token.TokenAuthMiddleware(), clientes.CrearCliente)
-		rutes.GET("/getclients/:numcedula", token.TokenAuthMiddleware(), clientes.BuscarCliente)
-		rutes.PATCH("/patchclients/:id", token.TokenAuthMiddleware(), clientes.ActualizarCliente)
-		rutes.DELETE("/delclients/:id", token.TokenAuthMiddleware(), clientes.EliminarCliente)
+		rutes.GET("/clients" /*token.TokenAuthMiddleware(),*/, clientes.ObtenerCliente)
+		rutes.POST("/sendclients" /* token.TokenAuthMiddleware(),*/, clientes.CrearCliente)
+		rutes.GET("/getclients/:valor" /*token.TokenAuthMiddleware(),*/, clientes.BuscarCliente)
+		rutes.PATCH("/patchclients/:id" /*token.TokenAuthMiddleware(),*/, clientes.ActualizarCliente)
+		rutes.DELETE("/delclients/:id" /*token.TokenAuthMiddleware(),*/, clientes.EliminarCliente)
 
 		//EMPLEADO
 		rutes.GET("/employees" /*token.TokenAuthMiddleware(),*/, empleados.ObtenerEmpleado)

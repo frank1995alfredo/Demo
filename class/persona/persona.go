@@ -2,7 +2,7 @@ package persona
 
 //Persona ... esta  estructura tiene atributos privados
 type Persona struct {
-	personaID   uint
+	personaID   string
 	discID      uint
 	ciuID       uint
 	priNombre   string
@@ -20,7 +20,7 @@ type Persona struct {
 }
 
 //PersonaConstructor ...  constructor
-func (persona *Persona) PersonaConstructor(personaID uint, discID uint, ciuID uint,
+func (persona *Persona) PersonaConstructor(personaID string, discID uint, ciuID uint,
 	priNombre string, segNombre string, priApellido string, segApellido string, fechaNac string,
 	numCedula string, direccion string, email string, telefono string,
 	genero string, estado bool, nivelDis string) {
@@ -39,15 +39,16 @@ func (persona *Persona) PersonaConstructor(personaID uint, discID uint, ciuID ui
 	persona.telefono = telefono
 	persona.genero = genero
 	persona.nivelDis = nivelDis
+
 }
 
 //GetPersonaID ...
-func (persona *Persona) GetPersonaID() uint {
+func (persona *Persona) GetPersonaID() string {
 	return persona.personaID
 }
 
 //SetPersonaID ...
-func (persona *Persona) SetPersonaID(id uint) {
+func (persona *Persona) SetPersonaID(id string) {
 	persona.personaID = id
 }
 
